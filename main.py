@@ -38,7 +38,7 @@ def checkDropped():
         dropped = True
         droppedTime = frameCount
         return
-    if placedPiece:
+    """if placedPiece:
         for i in placedPiece:
             if type(i) is list:
                 continue
@@ -46,7 +46,12 @@ def checkDropped():
                 moveUp()
                 dropped = True
                 droppedTime = frameCount
-                return
+                return"""
+    if collideWithExisting():
+        moveUp()
+        dropped = True
+        droppedTime = frameCount
+        return
 
 def newPiece():
     global newShape, pieceCount, bag, piece, dropped
@@ -84,13 +89,20 @@ def moveHorizontal():
     newShape.two.x += deltaX
     newShape.three.x += deltaX
     newShape.four.x += deltaX
-    if newShape.one.colliderect(left) or newShape.two.colliderect(left) or newShape.three.colliderect(left) or newShape.four.colliderect(left) or newShape.one.colliderect(right) or newShape.two.colliderect(right) or newShape.three.colliderect(right) or newShape.four.colliderect(right):
+    if newShape.one.colliderect(left) or newShape.two.colliderect(left) or newShape.three.colliderect(left) or newShape.four.colliderect(left) or newShape.one.colliderect(right) or newShape.two.colliderect(right) or newShape.three.colliderect(right) or newShape.four.colliderect(right) or collideWithExisting():
         newShape.one.x -= deltaX
         newShape.two.x -= deltaX
         newShape.three.x -= deltaX
         newShape.four.x -= deltaX
     
-
+def collideWithExisting():
+    global newShape, placedPiece
+    if placedPiece:
+        for i in placedPiece:
+            if type(i) is list:
+                continue
+            elif newShape.one.colliderect(i) or newShape.two.colliderect(i) or newShape.three.colliderect(i) or newShape.four.colliderect(i):
+                return True
 
 def resetPiece():
     global newShape
