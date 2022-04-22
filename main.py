@@ -1,4 +1,5 @@
 from hashlib import new
+from numpy import full
 import pygame
 import random
 import copy
@@ -129,12 +130,14 @@ def moveRight():
 
 def rotateCCW():
     global newShape
+    global lastMove
     originalOne = copy.copy(newShape.one)
     originalTwo = copy.copy(newShape.two)
     originalThree = copy.copy(newShape.three)
     originalFour = copy.copy(newShape.four)
     originalRotation = copy.copy(newShape.rotation)
     if newShape.name == 'O':
+        lastMove = "rotation"
         return #I'm too lazy to code the spin, deal with it
     elif newShape.name == 'I':
         if newShape.rotation[1] == 0: #rotation 0 to 3
@@ -148,7 +151,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 2
             newShape.one.x += 60
             newShape.one.y -= 30
@@ -160,7 +163,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 1
             newShape.one.x -= 30
             newShape.one.y -= 60
@@ -172,7 +175,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 0
             newShape.one.x -= 60
             newShape.one.y += 30
@@ -184,7 +187,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'T':
         if newShape.rotation[1] == 0: #rotation 0 to 3
@@ -198,7 +201,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 2
             newShape.one.x += 30
             newShape.one.y += 30
@@ -210,7 +213,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 1
             newShape.one.x += 30
             newShape.one.y -= 30
@@ -222,7 +225,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 0
             newShape.one.x -= 30
             newShape.one.y -= 30
@@ -234,7 +237,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
     elif newShape.name == 'J': 
         if newShape.rotation[1] == 0: #rotation 0 to 3
             newShape.one.y += 60
@@ -246,7 +249,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 2
             newShape.one.x += 60
             newShape.two.x += 30
@@ -257,7 +260,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 1
             newShape.one.y -= 60
             newShape.two.x -= 30
@@ -268,7 +271,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 0
             newShape.one.x -= 60
             newShape.two.x -= 30
@@ -279,7 +282,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'L':
         if newShape.rotation[1] == 0: #rotation 0 to 3
@@ -292,7 +295,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 2
             newShape.one.x += 30
             newShape.one.y -= 30
@@ -303,7 +306,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 1:
             newShape.one.x -= 30
             newShape.one.y -= 30
@@ -314,7 +317,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 0
             newShape.one.x -= 30 
             newShape.one.y += 30
@@ -325,7 +328,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'S':
         if newShape.rotation[1] == 0: #rotation 0 to 3
@@ -338,7 +341,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 2
             newShape.one.x += 30
             newShape.one.y += 30
@@ -349,7 +352,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 1
             newShape.one.x += 30
             newShape.one.y -= 30
@@ -360,7 +363,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 0
             newShape.one.x -= 30
             newShape.one.y -= 30
@@ -371,7 +374,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'Z':
         if newShape.rotation[1] == 0: #rotation 0 to 3
@@ -384,7 +387,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 2
             newShape.one.x += 60
             newShape.two.x += 30
@@ -395,7 +398,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 1
             newShape.one.y -= 60
             newShape.two.x += 30
@@ -406,7 +409,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 0
             newShape.one.x -= 60
             newShape.two.x -= 30
@@ -417,16 +420,18 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
 def rotateCW():
     global newShape
+    global lastMove
     originalOne = copy.copy(newShape.one)
     originalTwo = copy.copy(newShape.two)
     originalThree = copy.copy(newShape.three)
     originalFour = copy.copy(newShape.four)
     originalRotation = copy.copy(newShape.rotation)
     if newShape.name == 'O':
+        lastMove = "rotation"
         return #I'm too lazy to code the spin, deal with it
     elif newShape.name == 'I':
         if newShape.rotation[1] == 0: #rotation 0 to 1
@@ -440,7 +445,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 2
             newShape.one.x += 30
             newShape.one.y += 60
@@ -452,7 +457,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 3
             newShape.one.x -= 60
             newShape.one.y += 30
@@ -464,7 +469,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 0
             newShape.one.x -= 30
             newShape.one.y -= 60
@@ -476,7 +481,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
     
     elif newShape.name == 'T':
         if newShape.rotation[1] == 0: #rotation 0 to 1
@@ -490,7 +495,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 2
             newShape.one.x -= 30
             newShape.one.y += 30
@@ -502,7 +507,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 3
             newShape.one.x -= 30
             newShape.one.y -= 30
@@ -514,7 +519,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 0
             newShape.one.x += 30
             newShape.one.y -= 30
@@ -526,7 +531,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'J':
         if newShape.rotation[1] == 0: #rotation 0 to 1
@@ -539,7 +544,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 2
             newShape.one.y += 60
             newShape.two.x += 30
@@ -550,7 +555,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 3
             newShape.one.x -= 60
             newShape.two.x -= 30
@@ -561,7 +566,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 0
             newShape.one.y -= 60
             newShape.two.x -= 30
@@ -572,7 +577,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'L':
         if newShape.rotation[1] == 0: #rotation 0 to 1
@@ -585,7 +590,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 2
             newShape.one.x += 30
             newShape.one.y += 30
@@ -596,7 +601,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 3
             newShape.one.x -= 30
             newShape.one.y += 30
@@ -607,7 +612,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 0
             newShape.one.x -= 30
             newShape.one.y -= 30
@@ -618,7 +623,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'S':
         if newShape.rotation[1] == 0: #rotation = 0 to 1
@@ -631,7 +636,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 2
             newShape.one.x -= 30
             newShape.one.y += 30
@@ -642,7 +647,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 3
             newShape.one.x -= 30
             newShape.one.y -= 30
@@ -653,7 +658,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 0
             newShape.one.x += 30
             newShape.one.y -= 30
@@ -664,7 +669,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
     elif newShape.name == 'Z':
         if newShape.rotation[1] == 0: #rotation 0 to 1
             newShape.one.x += 60
@@ -676,7 +681,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 2
             newShape.one.y += 60
             newShape.two.x -= 30
@@ -687,7 +692,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 3
             newShape.one.x -= 60
             newShape.two.x -= 30
@@ -698,7 +703,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 0
             newShape.one.y -= 60
             newShape.two.x += 30
@@ -709,16 +714,18 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
 def rotate180():
     global newShape
+    global lastMove
     originalOne = copy.copy(newShape.one)
     originalTwo = copy.copy(newShape.two)
     originalThree = copy.copy(newShape.three)
     originalFour = copy.copy(newShape.four)
     originalRotation = copy.copy(newShape.rotation)
     if newShape.name == 'O':
+        lastMove = "rotation"
         return #no O-spin deal with it
     if newShape.name == 'I':
         if newShape.rotation[1] == 0: #rotation 0 to 2 
@@ -731,7 +738,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 3
             newShape.one.y += 90
             newShape.two.y += 30
@@ -742,7 +749,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 0 
             newShape.one.x -= 90
             newShape.two.x -= 30
@@ -753,7 +760,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 1
             newShape.one.y -= 90
             newShape.two.y -= 30
@@ -764,7 +771,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'T':
         if newShape.rotation[1] == 0: #rotation 0 to 2
@@ -775,7 +782,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #roation 1 to 3
             newShape.one.x -= 60
             newShape.two.y += 60
@@ -784,7 +791,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 0
             newShape.one.y -= 60
             newShape.two.x -= 60
@@ -793,7 +800,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 1
             newShape.one.x += 60
             newShape.two.y -= 60
@@ -802,7 +809,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'J':
         if newShape.rotation[1] == 0: #rotation 0 to 2
@@ -814,7 +821,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 3
             newShape.one.x -= 60
             newShape.one.y += 60
@@ -824,7 +831,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 0
             newShape.one.x -= 60
             newShape.one.y -= 60
@@ -834,7 +841,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 1
             newShape.one.x += 60
             newShape.one.y -= 60
@@ -844,7 +851,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'L': 
         if newShape.rotation[1] == 0: #rotation 0 to 2
@@ -856,7 +863,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 3
             newShape.one.y += 60
             newShape.three.y -= 60
@@ -866,7 +873,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 0
             newShape.one.x -= 60
             newShape.three.x += 60
@@ -876,7 +883,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 1
             newShape.one.y -= 60
             newShape.three.y += 60
@@ -886,7 +893,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
     elif newShape.name == 'S':
         if newShape.rotation[1] == 0: #rotation 0 to 2
@@ -898,7 +905,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 3
             newShape.one.x -= 60
             newShape.two.x -= 60
@@ -908,7 +915,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 0
             newShape.one.y -= 60
             newShape.two.x += 60
@@ -918,7 +925,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 1
             newShape.one.x += 60
             newShape.two.x += 60
@@ -928,7 +935,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
     
     elif newShape.name == 'Z':
         if newShape.rotation[1] == 0: #rotation 0 to 2
@@ -940,7 +947,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 1: #rotation 1 to 3
             newShape.one.x -= 60
             newShape.one.y += 60
@@ -950,7 +957,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 2: #rotation 2 to 0
             newShape.one.x -= 60
             newShape.one.y -= 60
@@ -960,7 +967,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
         elif newShape.rotation[1] == 3: #rotation 3 to 1
             newShape.one.x += 60
             newShape.one.y -= 60
@@ -970,7 +977,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: return
+            else: lastMove = "rotation"; return
 
 def none():
     return            
@@ -1011,53 +1018,53 @@ def wallKick(): #check if the rotation is valid, if not, test the wall kicks
     originalThree = copy.copy(newShape.three)
     originalFour = copy.copy(newShape.four)
     if newShape.name == 'T' or newShape.name == 'S' or newShape.name == 'Z' or newShape.name == 'J' or newShape.name == 'L':
-        if not detectCollision(): #test 1, no kick
+        if not detectCollision(None): #test 1, no kick
             return True #succes, no need to attempt kicks
         wallKickLUT[str([newShape.rotation, 2])]() #test 2
-        if not detectCollision():
+        if not detectCollision(None):
             return True #success
         else:
             newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
         wallKickLUT[str([newShape.rotation, 3])][0](), wallKickLUT[str([newShape.rotation, 3])][1]() #test 3
-        if not detectCollision():
+        if not detectCollision(None):
             return True #success
         else:
             newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
         wallKickLUT[str([newShape.rotation, 4])][0](), wallKickLUT[str([newShape.rotation, 4])][1]() #test 4
-        if not detectCollision():
+        if not detectCollision(None):
             return True #success
         else:
             newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
         wallKickLUT[str([newShape.rotation, 5])][0](), wallKickLUT[str([newShape.rotation, 5])][1](), wallKickLUT[str([newShape.rotation, 5])][2]() #test 5
-        if not detectCollision():
+        if not detectCollision(None):
             return True #success
         else:
             newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset position to before kick
             return False #failure
 
     if newShape.name == 'I':
-        if not detectCollision(): #test 1, no kick
+        if not detectCollision(None): #test 1, no kick
             return True #succes, no need to attempt kicks
         wallKickLUT_I[str([newShape.rotation, 2])][0](), wallKickLUT_I[str([newShape.rotation, 2])][1]() #test 2
-        if not detectCollision():
+        if not detectCollision(None):
             print("test 2 success")
             return True #success
         else:
             newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
         wallKickLUT_I[str([newShape.rotation, 3])][0](), wallKickLUT_I[str([newShape.rotation, 3])][1]() #test 3
-        if not detectCollision():
+        if not detectCollision(None):
             print("test 3 success")
             return True #success
         else:
             newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
         wallKickLUT_I[str([newShape.rotation, 4])][0](), wallKickLUT_I[str([newShape.rotation, 4])][1](), wallKickLUT_I[str([newShape.rotation, 4])][2]() #test 4
-        if not detectCollision():
+        if not detectCollision(None):
             print("test 4 success")
             return True #success
         else:
             newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
         wallKickLUT_I[str([newShape.rotation, 5])][0](), wallKickLUT_I[str([newShape.rotation, 5])][1](), wallKickLUT_I[str([newShape.rotation, 5])][2]() #test 5
-        if not detectCollision():
+        if not detectCollision(None):
             print("test 5 success")
             return True #success
         else:
@@ -1071,45 +1078,47 @@ def wallKick180():
     originalTwo = copy.copy(newShape.two)
     originalThree = copy.copy(newShape.three)
     originalFour = copy.copy(newShape.four)
-    if not detectCollision(): #test 1, no kick
+    if not detectCollision(None): #test 1, no kick
         return True #succes, no need to attempt kicks
     wallKickLUT_180[str([newShape.rotation, 2])]() #test 2
-    if not detectCollision():
+    if not detectCollision(None):
         return True #success
     else:
         newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
     wallKickLUT_180[str([newShape.rotation, 3])][0](), wallKickLUT_180[str([newShape.rotation, 3])][1](), wallKickLUT_180[str([newShape.rotation, 3])][2]() #test 3
-    if not detectCollision():
+    if not detectCollision(None):
         return True #success
     else:
         newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
     wallKickLUT_180[str([newShape.rotation, 4])][0](), wallKickLUT_180[str([newShape.rotation, 4])][1]() #test 4
-    if not detectCollision():
+    if not detectCollision(None):
         return True #success
     else:
         newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
     wallKickLUT_180[str([newShape.rotation, 5])][0](), wallKickLUT_180[str([newShape.rotation, 5])][1]() #test 5
-    if not detectCollision():
+    if not detectCollision(None):
         return True #success
     else:
         newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
     wallKickLUT_180[str([newShape.rotation, 6])]() #test 6
-    if not detectCollision():
+    if not detectCollision(None):
         return True #success
     else:
         newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour) #reset the position for next test
         return False #failed
 
 def moveHorizontal():
-    global newShape, deltaX
+    global newShape, deltaX, lastMove
     if deltaX == 0:
         return
     if deltaX < 0 and not touchingExisting_left() and not touchingLeft():
+        lastMove = "move left"
         newShape.one.x += deltaX
         newShape.two.x += deltaX
         newShape.three.x += deltaX
         newShape.four.x += deltaX
     if deltaX > 0 and not touchingExisting_right() and not touchingRight():
+        lastMove = "move right"
         newShape.one.x += deltaX
         newShape.two.x += deltaX
         newShape.three.x += deltaX
@@ -1169,7 +1178,20 @@ def touchingBottom():
         return True
     else: moveUp(); return False
 
-def detectCollision():
+def detectCollision(piece): #i messed up here, this is a last min fix
+    #for current piece collision use param 0 or None
+    if piece: #collision detection for a specific piece 
+        if piece.colliderect(bottom) or piece.colliderect(left) or piece.colliderect(right):
+            return True
+        if placedPiece:
+            for i in placedPiece:
+                if type(i) is list:
+                    continue
+                elif piece.colliderect(i):
+                    return True
+            return False
+        else: return False
+
     if newShape.one.colliderect(bottom) or newShape.two.colliderect(bottom) or newShape.three.colliderect(bottom) or newShape.four.colliderect(bottom):
         return True
     if newShape.one.colliderect(left) or newShape.two.colliderect(left) or newShape.three.colliderect(left) or newShape.four.colliderect(left) or newShape.one.colliderect(right) or newShape.two.colliderect(right) or newShape.three.colliderect(right) or newShape.four.colliderect(right):
@@ -1299,6 +1321,59 @@ def dropPredict():
         pygame.draw.rect(screen, (255, 192, 128), Three)
         pygame.draw.rect(screen, (255, 192, 128), Four)
 
+
+
+def lineClear():
+    global placedPiece
+    yValues = [] #list of all the placed pieces' y coordinates
+    fullLines = [] #list of all full lines
+    for i in placedPiece:
+        if type(i) is list: 
+            continue
+        else: 
+            yValues.append(i.y) #add the y coordinates to the list
+    for y in range(300, 900, 30):
+        if yValues.count(y) == 10:
+            fullLines.append(y) #if there are more than 10 tiles on the same y levels it is a full line
+    if not fullLines: 
+        return #quit if there aren't any full lines
+    print(fullLines)
+
+    e = 0
+    while e < len(placedPiece): #remove the full lines
+        if type(placedPiece[e]) is list:
+            e += 1
+            continue
+        elif not placedPiece[e].y in fullLines:
+            e += 1
+        elif placedPiece[e].y in fullLines:
+            placedPiece.pop(e)
+
+    for i in placedPiece: #move the remaining pieces down
+        if type(i) is list:
+            continue
+        else:
+            i.y += len(fullLines)*30
+
+def checkTspin():
+    global newShape, lastMove
+    a = pygame.Rect(newShape.three.x - 30, newShape.three.y - 30, 30, 30)
+    b = pygame.Rect(newShape.three.x + 30, newShape.three.y - 30, 30, 30)
+    c = pygame.Rect(newShape.three.x - 30, newShape.three.y + 30, 30, 30)
+    d = pygame.Rect(newShape.three.x + 30, newShape.three.y + 30, 30, 30)
+    
+    if lastMove == "rotation" and ((detectCollision(a) + detectCollision(b) + detectCollision(c) + detectCollision(d)) >= 3):
+        print("t spin!")
+
+def checkPC():
+    global placedPiece
+    for i in placedPiece:
+        if type(i) is pygame.Rect:
+            return False
+    print("PERFECT CLEAR!")
+    return True
+
+
 def hardDrop():
     global pieceCount
     while not touchingBottom() and not touchingExisting_bottom():
@@ -1306,8 +1381,14 @@ def hardDrop():
         drawShape()
         pygame.display.update()
         pygame.time.delay(1)
+    if newShape.name == 'T':
+        checkTspin()
     setPiece()
     pieceCount += 1
+    lineClear()
+    checkPC()
+
+
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -1323,6 +1404,7 @@ run = True
 
 deltaX, softDrop = 0, False
 placedPiece = list()
+
 bag = list()
 input = bool()
 dropped = False
@@ -1330,6 +1412,7 @@ finishedDropping = True
 pieceCount = 0
 frameCount = 0
 droppedTime = int()
+lastMove = str()
 
 
 screen.fill(BLACK)
@@ -1345,17 +1428,17 @@ while run:
             if event.key == pygame.K_RIGHT: #right
                 deltaX = 30
                 input = True 
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE: #hard drop
                 hardDrop()
-            if event.key == pygame.K_ESCAPE:
+            if event.key == pygame.K_ESCAPE: #quit
                 run = False
-            if event.key == pygame.K_z:
+            if event.key == pygame.K_z: #rotate CCW
                 rotateCCW()
                 input = True
-            if event.key == pygame.K_x:
+            if event.key == pygame.K_x: #rotate CW
                 rotateCW()
                 input = True
-            if event.key == pygame.K_a:
+            if event.key == pygame.K_a: #rotate 180
                 rotate180()
                 input = True
         if event.type == pygame.KEYUP: #stop
@@ -1382,6 +1465,7 @@ while run:
         finishedDropping = False
 
     if softDrop == True and dropped == False and not touchingBottom() and not touchingExisting_bottom(): #if softdrop is inputted
+        lastMove = "move down"
         moveDown()
 
     moveHorizontal() #check if it needs to be shifted horizontally and does so
@@ -1407,7 +1491,6 @@ while run:
     drawPastShape() #draw all the previously dropped pieces
     pygame.draw.rect(screen, [255, 0, 255], bottom)
     drawGrid()
-    detectCollision()
     pygame.display.update()
     #print(dropped)
 
