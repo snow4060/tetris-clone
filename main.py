@@ -1,8 +1,10 @@
-from hashlib import new
-from numpy import full
+from shutil import register_unpack_format
+from turtle import reset
 import pygame
 import random
 import copy
+import threading as mt
+import time
 
 def drawGrid(): 
     blockSize = 30 #Set the size of the grid block
@@ -10,6 +12,115 @@ def drawGrid():
         for y in range(300, 900, blockSize):
             rect = pygame.Rect(x, y, blockSize, blockSize)
             pygame.draw.rect(screen, GREY, rect, 1)
+
+class particlePolygon:
+    def __init__(self, x, y, color, shrink):
+        self.particles = []
+        self.x = x
+        self.y = y
+        self.color = color
+        self.shrink = shrink
+
+    def addParticle(self):
+        radius = 5
+        directionX = random.randint(-2, 2)
+        directionY = random.randint(-2, 2)
+        particlePolygon = [[self.x, self.y-radius], [self.x+radius, self.y], [self.x, self.y+radius], [self.x-radius, self.y], radius, [directionX, directionY]]
+        self.particles.append(particlePolygon)
+
+    def emit(self):
+        if self.particles:
+            self.deleteParticles()
+            for particle in self.particles:
+                particle[0][1] += self.shrink
+                particle[1][0] -= self.shrink
+                particle[2][1] -= self.shrink #shrink the polygon
+                particle[3][0] += self.shrink
+                particle[4] -= self.shrink
+
+                particle[0][0] += particle[5][0]
+                particle[1][0] += particle[5][0] #random move in x axis
+                particle[2][0] += particle[5][0]
+                particle[3][0] += particle[5][0]
+
+                particle[0][1] += particle[5][1]
+                particle[1][1] += particle[5][1] #random move in y axis
+                particle[2][1] += particle[5][1]
+                particle[3][1] += particle[5][1]
+                
+                pygame.draw.polygon(screen, self.color, [particle[0], particle[1], particle[2], particle[3]])
+                pygame.display.update()
+
+    def deleteParticles(self):
+        particleCopy = [particle for particle in self.particles if particle[4] > 0.2]
+        self.particles = particleCopy
+
+def generateParticles(lines, xCoord, color, shrink, amount):
+    yay = []
+    if xCoord: #specific x coordinate provided
+        for n in range (0, amount):
+            for y in lines:
+                yay.append(particlePolygon(xCoord+15, y+15, color, shrink)) #5 particles for each tile
+    else: #cover the entire row
+        for x in range(300, 600, 30):
+            for n in range (0, amount):
+                for y in lines:
+                    yay.append(particlePolygon(x+15, y+15, color, shrink)) #5 particles for each tile
+    print(len(yay))
+    for i in yay:
+        i.addParticle() #add the particle for each particle
+    for n in range(0, 100):
+        for i in range(0, 2):
+            screen.fill(BLACK) #fill in the black background
+            #dropPredict() #update the drop predict
+            drawShape() #draw the urrent piece after the shifts
+            drawPastShape() #draw all the previously dropped pieces
+            #pygame.draw.rect(screen, [255, 0, 255], bottom)
+            drawGrid()
+            pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
+            pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
+            pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
+            #pygame.display.update()
+
+            for i in range(0, len(yay)):
+                yay[i].emit()
+    yay.clear()
+
+def tSpinParticles():
+    global newShape
+    a = pygame.Rect(newShape.three.x - 30, newShape.three.y - 30, 30, 30)
+    b = pygame.Rect(newShape.three.x + 30, newShape.three.y - 30, 30, 30)
+    c = pygame.Rect(newShape.three.x - 30, newShape.three.y + 30, 30, 30)
+    d = pygame.Rect(newShape.three.x + 30, newShape.three.y + 30, 30, 30)
+    if (detectCollision(a) + detectCollision(b) + detectCollision(c) + detectCollision(d)) >= 3: 
+        generateParticles([newShape.three.y], newShape.three.x, (255, 0, 255), 0.5, 10)
+
+"""def hardDropParticles():
+    t1 = mt.Thread(target=hardDropParticle1, args=())
+    t2 = mt.Thread(target=hardDropParticle2, args=())
+    t3 = mt.Thread(target=hardDropParticle3, args=())
+    t4 = mt.Thread(target=hardDropParticle4, args=())
+    t1.start()
+    t2.start()
+    t3.start()
+    t4.start()
+    t1.join()
+    t2.join()
+    t3.join()
+    t4.join()
+
+def hardDropParticle1():
+    if touchingBottom(newShape.one) or touchingExisting_bottom(newShape.one):
+        generateParticles([newShape.one.y+15], newShape.one.x, WHITE, 0.5, 2)
+def hardDropParticle2():
+    if touchingBottom(newShape.two) or touchingExisting_bottom(newShape.two):
+        generateParticles([newShape.two.y+15], newShape.two.x, WHITE, 0.5, 2)
+def hardDropParticle3():
+    if touchingBottom(newShape.three) or touchingExisting_bottom(newShape.three):
+        generateParticles([newShape.three.y+15], newShape.three.x, WHITE, 0.5, 2)
+def hardDropParticle4():
+    if touchingBottom(newShape.four) or touchingExisting_bottom(newShape.four):
+        generateParticles([newShape.four.y+15], newShape.four.x, WHITE, 0.5, 2)"""
 
 class O:
     one = pygame.Rect(420, 210, 30, 30)
@@ -83,23 +194,41 @@ def drawShape():
 def checkDropped():
     global dropped, frameCount, droppedTime
     if dropped == True:
-        if not touchingBottom() and not touchingExisting_bottom():
+        if not touchingBottom(None) and not touchingExisting_bottom(None):
             print("e")
             dropped = False
             droppedTime = 0
-    elif touchingBottom() or touchingExisting_bottom():
+    elif touchingBottom(None) or touchingExisting_bottom(None):
         dropped = True
         droppedTime = frameCount
         return
 
 def newPiece():
-    global newShape, pieceCount, bag, dropped
-    if pieceCount % 7 == 0:
+    global newShape, bag, dropped, queue, holdLock
+    if not bag:
         bag = [O, I, T, J, L, S , Z]
-    newShape = random.choice(bag)
-    bag.remove(newShape)
-    dropped = False
+    while len(queue) < 5:
+        queue.append(random.choice(bag))
+        bag.remove(queue[-1])
+    print(queue)
+    print(bag)
+    newShape = queue[0]; queue.pop(0)
+    dropped = False; holdLock = False
 
+def hold():
+    global newShape, holdPiece, holdLock
+    if holdLock:
+        return
+    if not holdPiece:
+        resetPiece()
+        holdPiece = newShape
+        newPiece()
+        holdLock = True
+    else:
+        resetPiece()
+        holdPiece, newShape = newShape, holdPiece
+        holdLock = True
+ 
 def moveDown():
     global newShape
     newShape.one.y += 30
@@ -130,7 +259,7 @@ def moveRight():
 
 def rotateCCW():
     global newShape
-    global lastMove
+    global lastMove, yCoordinate
     originalOne = copy.copy(newShape.one)
     originalTwo = copy.copy(newShape.two)
     originalThree = copy.copy(newShape.three)
@@ -201,7 +330,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
         elif newShape.rotation[1] == 3: #rotation 3 to 2
             newShape.one.x += 30
             newShape.one.y += 30
@@ -213,7 +342,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
         elif newShape.rotation[1] == 2: #rotation 2 to 1
             newShape.one.x += 30
             newShape.one.y -= 30
@@ -225,7 +354,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
         elif newShape.rotation[1] == 1: #rotation 1 to 0
             newShape.one.x -= 30
             newShape.one.y -= 30
@@ -237,7 +366,7 @@ def rotateCCW():
             newShape.rotation[1] = (newShape.rotation[0]+3)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
     elif newShape.name == 'J': 
         if newShape.rotation[1] == 0: #rotation 0 to 3
             newShape.one.y += 60
@@ -424,7 +553,7 @@ def rotateCCW():
 
 def rotateCW():
     global newShape
-    global lastMove
+    global lastMove, yCoordinate
     originalOne = copy.copy(newShape.one)
     originalTwo = copy.copy(newShape.two)
     originalThree = copy.copy(newShape.three)
@@ -495,7 +624,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
         elif newShape.rotation[1] == 1: #rotation 1 to 2
             newShape.one.x -= 30
             newShape.one.y += 30
@@ -507,7 +636,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
         elif newShape.rotation[1] == 2: #rotation 2 to 3
             newShape.one.x -= 30
             newShape.one.y -= 30
@@ -519,7 +648,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
         elif newShape.rotation[1] == 3: #rotation 3 to 0
             newShape.one.x += 30
             newShape.one.y -= 30
@@ -531,7 +660,7 @@ def rotateCW():
             newShape.rotation[1] = (newShape.rotation[0]+1)%4 #update current rotation index
             if not wallKick(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
 
     elif newShape.name == 'J':
         if newShape.rotation[1] == 0: #rotation 0 to 1
@@ -718,7 +847,7 @@ def rotateCW():
 
 def rotate180():
     global newShape
-    global lastMove
+    global lastMove, yCoordinate
     originalOne = copy.copy(newShape.one)
     originalTwo = copy.copy(newShape.two)
     originalThree = copy.copy(newShape.three)
@@ -782,7 +911,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
         elif newShape.rotation[1] == 1: #roation 1 to 3
             newShape.one.x -= 60
             newShape.two.y += 60
@@ -791,7 +920,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
         elif newShape.rotation[1] == 2: #rotation 2 to 0
             newShape.one.y -= 60
             newShape.two.x -= 60
@@ -800,7 +929,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
         elif newShape.rotation[1] == 3: #rotation 3 to 1
             newShape.one.x += 60
             newShape.two.y -= 60
@@ -809,7 +938,7 @@ def rotate180():
             newShape.rotation[1] = (newShape.rotation[0]+2)%4 #update current rotation index
             if not wallKick180(): #rotation is possible, undo everything
                 newShape.one = copy.copy(originalOne); newShape.two = copy.copy(originalTwo); newShape.three = copy.copy(originalThree); newShape.four = copy.copy(originalFour); newShape.rotation = copy.copy(originalRotation)
-            else: lastMove = "rotation"; return
+            else: lastMove = "rotation"; yCoordinate = newShape.three.y; tSpinParticles(); return
 
     elif newShape.name == 'J':
         if newShape.rotation[1] == 0: #rotation 0 to 2
@@ -1108,23 +1237,35 @@ def wallKick180():
         return False #failed
 
 def moveHorizontal():
-    global newShape, deltaX, lastMove
-    if deltaX == 0:
+    global newShape, dx, lastMove
+    if dx == 0:
         return
-    if deltaX < 0 and not touchingExisting_left() and not touchingLeft():
+    if dx < 0 and not touchingExisting_left() and not touchingLeft():
         lastMove = "move left"
-        newShape.one.x += deltaX
-        newShape.two.x += deltaX
-        newShape.three.x += deltaX
-        newShape.four.x += deltaX
-    if deltaX > 0 and not touchingExisting_right() and not touchingRight():
+        newShape.one.x += dx
+        newShape.two.x += dx
+        newShape.three.x += dx
+        newShape.four.x += dx
+    if dx > 0 and not touchingExisting_right() and not touchingRight():
         lastMove = "move right"
-        newShape.one.x += deltaX
-        newShape.two.x += deltaX
-        newShape.three.x += deltaX
-        newShape.four.x += deltaX
+        newShape.one.x += dx
+        newShape.two.x += dx
+        newShape.three.x += dx
+        newShape.four.x += dx
     
-def touchingExisting_bottom():
+def touchingExisting_bottom(piece):
+    if piece:
+        moveDown()
+        if placedPiece:
+            for i in placedPiece:
+                if type(i) is list:
+                    continue
+                elif piece.colliderect(i):
+                    moveUp()
+                    return True
+            moveUp(); return False
+        else: moveUp(); return False
+
     moveDown()
     if placedPiece:
         for i in placedPiece:
@@ -1171,7 +1312,13 @@ def touchingRight():
         return True
     else: moveLeft(); return False
 
-def touchingBottom():
+def touchingBottom(piece):
+    if piece:
+        moveDown()
+        if piece.colliderect(bottom):
+            moveUp()
+            return True
+        else: moveUp(); return False
     moveDown()
     if newShape.one.colliderect(bottom) or newShape.two.colliderect(bottom) or newShape.three.colliderect(bottom) or newShape.four.colliderect(bottom):
         moveUp()
@@ -1321,8 +1468,6 @@ def dropPredict():
         pygame.draw.rect(screen, (255, 192, 128), Three)
         pygame.draw.rect(screen, (255, 192, 128), Four)
 
-
-
 def lineClear():
     global placedPiece
     yValues = [] #list of all the placed pieces' y coordinates
@@ -1339,21 +1484,34 @@ def lineClear():
         return #quit if there aren't any full lines
     print(fullLines)
 
-    e = 0
-    while e < len(placedPiece): #remove the full lines
-        if type(placedPiece[e]) is list:
-            e += 1
+    i = 0
+    while i < len(placedPiece): #remove the full lines
+        if type(placedPiece[i]) is list:
+            i += 1
             continue
-        elif not placedPiece[e].y in fullLines:
-            e += 1
-        elif placedPiece[e].y in fullLines:
-            placedPiece.pop(e)
+        elif not placedPiece[i].y in fullLines:
+            i += 1
+        elif placedPiece[i].y in fullLines:
+            placedPiece.pop(i)
 
-    for i in placedPiece: #move the remaining pieces down
-        if type(i) is list:
-            continue
-        else:
-            i.y += len(fullLines)*30
+
+    t1 = mt.Thread(target=generateParticles, args=(fullLines, None, WHITE, 0.5, round(6.5-1.4*len(fullLines)),))
+    t2 = mt.Thread(target=fallDown, args=(fullLines,))
+
+    t1.start()
+    t2.start()
+
+    t2.join()
+    t1.join()
+
+def fallDown(lines):
+    global placedPiece
+    for h in lines: #move the remaining pieces down
+        for i in placedPiece: 
+            if type(i) is list:
+                continue
+            if i.y < h: 
+                i.y += 30
 
 def checkTspin():
     global newShape, lastMove
@@ -1362,7 +1520,7 @@ def checkTspin():
     c = pygame.Rect(newShape.three.x - 30, newShape.three.y + 30, 30, 30)
     d = pygame.Rect(newShape.three.x + 30, newShape.three.y + 30, 30, 30)
     
-    if lastMove == "rotation" and ((detectCollision(a) + detectCollision(b) + detectCollision(c) + detectCollision(d)) >= 3):
+    if lastMove == "rotation" and ((detectCollision(a) + detectCollision(b) + detectCollision(c) + detectCollision(d)) >= 3) and newShape.three.y - yCoordinate == 0: 
         print("t spin!")
 
 def checkPC():
@@ -1375,14 +1533,16 @@ def checkPC():
 
 
 def hardDrop():
-    global pieceCount
-    while not touchingBottom() and not touchingExisting_bottom():
+    while not touchingBottom(None) and not touchingExisting_bottom(None):
         moveDown()
         drawShape()
         pygame.display.update()
         pygame.time.delay(1)
     if newShape.name == 'T':
         checkTspin()
+
+def hardDrop2():
+    global pieceCount
     setPiece()
     pieceCount += 1
     lineClear()
@@ -1393,19 +1553,22 @@ def hardDrop():
 pygame.init()
 clock = pygame.time.Clock()
 pygame.display.set_caption("aw lord")
-screen = pygame.display.set_mode((900, 1000)) 
+screen = pygame.display.set_mode((900, 1000), flags=pygame.RESIZABLE) 
 bottom = pygame.Rect(300, 900, 300, 300)
 left = pygame.Rect(0, 0, 300, 1000)
 right = pygame.Rect(600, 0, 300, 1000)
 
 GREY = (71, 71, 71)
 BLACK = (0,0,0)
+WHITE = (255, 255, 255)
 run = True
 
-deltaX, softDrop = 0, False
+dx, softDrop = 0, False
 placedPiece = list()
-
 bag = list()
+queue = []
+holdPiece = None
+holdLock = False
 input = bool()
 dropped = False
 finishedDropping = True
@@ -1413,23 +1576,28 @@ pieceCount = 0
 frameCount = 0
 droppedTime = int()
 lastMove = str()
+yCoordinate = 0
 
 
 screen.fill(BLACK)
 while run:
     for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
         if event.type == pygame.KEYDOWN: #has to be inside the for loop 
             if event.key == pygame.K_DOWN: #down
                 softDrop = True
                 input = True
             if event.key == pygame.K_LEFT: #left
-                deltaX = -30
+                dx = -30
                 input = True
             if event.key == pygame.K_RIGHT: #right
-                deltaX = 30
+                dx = 30
                 input = True 
             if event.key == pygame.K_SPACE: #hard drop
                 hardDrop()
+                #hardDropParticles()
+                hardDrop2()
             if event.key == pygame.K_ESCAPE: #quit
                 run = False
             if event.key == pygame.K_z: #rotate CCW
@@ -1441,15 +1609,17 @@ while run:
             if event.key == pygame.K_a: #rotate 180
                 rotate180()
                 input = True
+            if event.key == pygame.K_c: #hold
+                hold()
         if event.type == pygame.KEYUP: #stop
             if event.key == pygame.K_DOWN:
                 softDrop = False
                 input = False
             if event.key == pygame.K_LEFT:
-                deltaX = 0
+                dx = 0
                 input = False
             if event.key == pygame.K_RIGHT:
-                deltaX = 0
+                dx = 0
                 input = False
             if event.key == pygame.K_z:
                 input = False
@@ -1464,15 +1634,15 @@ while run:
         newPiece()
         finishedDropping = False
 
-    if softDrop == True and dropped == False and not touchingBottom() and not touchingExisting_bottom(): #if softdrop is inputted
+    if softDrop == True and dropped == False and not touchingBottom(None) and not touchingExisting_bottom(None) and frameCount %2 == 0: #if softdrop is inputted
         lastMove = "move down"
         moveDown()
+    if frameCount %2 == 0:
+        moveHorizontal() #check if it needs to be shifted horizontally and does so
 
-    moveHorizontal() #check if it needs to be shifted horizontally and does so
-
-    if frameCount % 4 == 0 and input == False and dropped == False and not frameCount % 12 == 0: #move down every 12 frames
+    if frameCount % 8 == 0 and input == False and dropped == False and not frameCount % 24 == 0: #move down every 12 frames
         moveDown()
-    if frameCount % 12 == 0 and dropped == False and softDrop == False: #prevent player from stalling game by holding rotate/move by force moving every 12 frames
+    if frameCount % 24 == 0 and dropped == False and softDrop == False: #prevent player from stalling game by holding rotate/move by force moving every 12 frames
         moveDown()
 
     checkDropped() #check if this piece has been dropped
@@ -1482,6 +1652,7 @@ while run:
     if dropped == True and frameCount - droppedTime >= 15: 
         print("hard drop")
         hardDrop()  
+        hardDrop2()
 
     #-----\UPDATE DISPLAY/-----#
     
@@ -1489,15 +1660,18 @@ while run:
     dropPredict() #update the drop predict
     drawShape() #draw the urrent piece after the shifts
     drawPastShape() #draw all the previously dropped pieces
-    pygame.draw.rect(screen, [255, 0, 255], bottom)
+    #pygame.draw.rect(screen, [255, 0, 255], bottom)
     drawGrid()
+    pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
+    pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
+    pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
     pygame.display.update()
     #print(dropped)
 
 
     
 
-    clock.tick(15) #15 FPS
+    clock.tick(30) #15 FPS
 
 pygame.quit()  # de-initialize the pygame module
 print(pieceCount)
