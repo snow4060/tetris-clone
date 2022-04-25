@@ -55,7 +55,7 @@ class particlePolygon:
         particleCopy = [particle for particle in self.particles if particle[4] > 0.2]
         self.particles = particleCopy
 
-def generateParticles(lines, xCoord, color, shrink, amount):
+def generateParticles(lines, xCoord, color, shrink, amount, teaSpin):
     yay = []
     if xCoord: #specific x coordinate provided
         for n in range (0, amount):
@@ -70,19 +70,22 @@ def generateParticles(lines, xCoord, color, shrink, amount):
     for i in yay:
         i.addParticle() #add the particle for each particle
     for n in range(0, 100):
-        for i in range(0, 2):
+        for i in range(0, 1):
             screen.fill(BLACK) #fill in the black background
             #dropPredict() #update the drop predict
-            drawShape() #draw the urrent piece after the shifts
+            if teaSpin:
+                drawShape() 
             drawPastShape() #draw all the previously dropped pieces
             #pygame.draw.rect(screen, [255, 0, 255], bottom)
             drawGrid()
             pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
             pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
             pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
+            renderHold()
+            renderQueue()
             #pygame.display.update()
 
-            for i in range(0, len(yay)):
+            for i in range(0, len(yay)): #render the particles
                 yay[i].emit()
     yay.clear()
 
@@ -93,7 +96,7 @@ def tSpinParticles():
     c = pygame.Rect(newShape.three.x - 30, newShape.three.y + 30, 30, 30)
     d = pygame.Rect(newShape.three.x + 30, newShape.three.y + 30, 30, 30)
     if (detectCollision(a) + detectCollision(b) + detectCollision(c) + detectCollision(d)) >= 3: 
-        generateParticles([newShape.three.y], newShape.three.x, (255, 0, 255), 0.5, 10)
+        generateParticles([newShape.three.y], newShape.three.x, (255, 160, 255), 0.5, 10, True)
 
 """def hardDropParticles():
     t1 = mt.Thread(target=hardDropParticle1, args=())
@@ -130,6 +133,8 @@ class O:
     rotation = [0, 0]
     color = [255, 255, 0] #yellow
     name = 'O'
+    icon = pygame.image.load("o.png")
+    locked = pygame.image.load("oLocked.png")
 
 class I:
     one = pygame.Rect(390, 240, 30, 30)
@@ -139,6 +144,8 @@ class I:
     rotation = [0, 0]
     color = [0, 255, 255] #cyan 
     name = 'I'
+    icon = pygame.image.load("i.png")
+    locked = pygame.image.load("iLocked.png")
 
 class T:
     one = pygame.Rect(420, 210, 30, 30)
@@ -146,8 +153,10 @@ class T:
     three = pygame.Rect(420, 240, 30, 30)
     four = pygame.Rect(450, 240, 30, 30)
     rotation = [0, 0]
-    color = [128, 0, 128] #purple
+    color = [200, 0, 200] #purple
     name = 'T'
+    icon = pygame.image.load("t.png")
+    locked = pygame.image.load("tLocked.png")
 
 class S:
     one = pygame.Rect(420, 210, 30, 30)
@@ -157,6 +166,8 @@ class S:
     rotation = [0, 0]
     color = [0, 255, 0] #green
     name = 'S'
+    icon = pygame.image.load("s.png")
+    locked = pygame.image.load("sLocked.png")
 
 class Z:
     one = pygame.Rect(390, 210, 30, 30)
@@ -166,6 +177,8 @@ class Z:
     rotation = [0, 0]
     color = [255, 0, 0] #red
     name = 'Z'
+    icon = pygame.image.load("z.png")
+    locked = pygame.image.load("zLocked.png")
 
 class J:
     one = pygame.Rect(390, 210, 30, 30)
@@ -175,6 +188,8 @@ class J:
     rotation = [0, 0]
     color = [0, 0, 255] #blue
     name = 'J'
+    icon = pygame.image.load("j.png")
+    locked = pygame.image.load("jLocked.png")
 
 class L:
     one = pygame.Rect(390, 240, 30, 30)
@@ -184,6 +199,8 @@ class L:
     rotation = [0, 0]
     color = [255, 127, 0] #orange
     name = 'L'
+    icon = pygame.image.load("l.png")
+    locked = pygame.image.load("lLocked.png")
 
 def drawShape():
     pygame.draw.rect(screen, newShape.color, newShape.one)
@@ -207,7 +224,7 @@ def newPiece():
     global newShape, bag, dropped, queue, holdLock
     if not bag:
         bag = [O, I, T, J, L, S , Z]
-    while len(queue) < 5:
+    while len(queue) < 5+1:
         queue.append(random.choice(bag))
         bag.remove(queue[-1])
     print(queue)
@@ -1115,7 +1132,7 @@ wallKickLUT = { #wall kick look up table for T, S, Z, J, L
     "[[0, 1], 2]": (moveLeft), "[[0, 1], 3]": (moveLeft, moveUp), "[[0, 1], 4]": (moveDown, moveDown), "[[0, 1], 5]": (moveLeft, moveDown, moveDown), #rotating from 0 to 1 CW
     "[[1, 0], 2]": (moveRight), "[[1, 0], 3]": (moveRight, moveDown), "[[1, 0], 4]": (moveUp, moveUp), "[[1, 0], 5]": (moveRight, moveUp, moveUp), #rotating from 1 to 0 CCW
     "[[1, 2], 2]": (moveRight), "[[1, 2], 3]": (moveRight, moveDown), "[[1, 2], 4]": (moveUp, moveUp), "[[1, 2], 5]": (moveRight, moveUp, moveUp), #rotating from 1 to 2 CW
-    "[[2, 1], 2]": (moveLeft), "[[2, 1], 3]": (moveLeft, moveUp), "[[2, 1], 3]": (moveDown, moveDown), "[[2, 1], 5]": (moveLeft, moveDown, moveDown), #rotating from 2 to 1 CCW
+    "[[2, 1], 2]": (moveLeft), "[[2, 1], 3]": (moveLeft, moveUp), "[[2, 1], 4]": (moveDown, moveDown), "[[2, 1], 5]": (moveLeft, moveDown, moveDown), #rotating from 2 to 1 CCW
     "[[2, 3], 2]": (moveRight), "[[2, 3], 3]": (moveRight, moveUp), "[[2, 3], 4]": (moveDown, moveDown), "[[2, 3], 5]": (moveRight, moveDown, moveDown), #rotating from 2 to 3 CW
     "[[3, 2], 2]": (moveLeft), "[[3, 2], 3]": (moveLeft, moveDown), "[[3, 2], 4]": (moveUp, moveUp), "[[3, 2], 5]": (moveLeft, moveUp, moveUp), #rotating from 3 to 2 CCW
     "[[3, 0], 2]": (moveLeft), "[[3, 0], 3]": (moveLeft, moveDown), "[[3, 0], 4]": (moveUp, moveUp), "[[3, 0], 5]": (moveLeft, moveUp, moveUp), #rotating from 3 to 0 CW
@@ -1126,7 +1143,7 @@ wallKickLUT_I = { #wall kick look up table for I
     "[[0, 1], 2]": (moveLeft, moveLeft), "[[0, 1], 3]": (moveRight, none), "[[0, 1], 4]": (moveLeft, moveLeft, moveDown), "[[0, 1], 5]": (moveRight, moveUp, moveUp), #rotating from 0 to 1 CW
     "[[1, 0], 2]": (moveRight, moveRight), "[[1, 0], 3]": (moveLeft, none), "[[1, 0], 4]": (moveRight, moveRight, moveUp), "[[1, 0], 5]": (moveLeft, moveDown, moveDown), #rotating from 1 to 0 CCW
     "[[1, 2], 2]": (moveLeft, none), "[[1, 2], 3]": (moveRight, moveRight), "[[1, 2], 4]": (moveLeft, moveUp, moveUp), "[[1, 2], 5]": (moveRight, moveRight, moveDown), #rotating from 1 to 2 CW
-    "[[2, 1], 2]": (moveRight, none), "[[2, 1], 3]": (moveLeft, moveLeft), "[[2, 1], 3]": (moveRight, moveDown, moveDown), "[[2, 1], 5]": (moveLeft, moveLeft, moveUp), #rotating from 2 to 1 CCW
+    "[[2, 1], 2]": (moveRight, none), "[[2, 1], 3]": (moveLeft, moveLeft), "[[2, 1], 4]": (moveRight, moveDown, moveDown), "[[2, 1], 5]": (moveLeft, moveLeft, moveUp), #rotating from 2 to 1 CCW
     "[[2, 3], 2]": (moveRight, moveRight), "[[2, 3], 3]": (moveLeft, none), "[[2, 3], 4]": (moveRight, moveRight, moveUp), "[[2, 3], 5]": (moveLeft, moveDown, moveDown), #rotating from 2 to 3 CW
     "[[3, 2], 2]": (moveLeft, moveLeft), "[[3, 2], 3]": (moveRight, none), "[[3, 2], 4]": (moveLeft, moveLeft, moveDown), "[[3, 2], 5]": (moveRight, moveUp, moveUp), #rotating from 3 to 2 CCW
     "[[3, 0], 2]": (moveRight, none), "[[3, 0], 3]": (moveLeft, moveLeft), "[[3, 0], 4]": (moveRight, moveDown, moveDown), "[[3, 0], 5]": (moveLeft, moveLeft, moveUp), #rotating from 3 to 0 CW
@@ -1443,10 +1460,10 @@ def dropPredict():
         pygame.draw.rect(screen, (155, 255, 255), Three)
         pygame.draw.rect(screen, (155, 255, 255), Four)
     elif newShape.name == 'T':
-        pygame.draw.rect(screen, (128, 64, 128), One)
-        pygame.draw.rect(screen, (128, 64, 128), Two)
-        pygame.draw.rect(screen, (128, 64, 128), Three)
-        pygame.draw.rect(screen, (128, 64, 128), Four)
+        pygame.draw.rect(screen, (200, 128, 200), One)
+        pygame.draw.rect(screen, (200, 128, 200), Two)
+        pygame.draw.rect(screen, (200, 128, 200), Three)
+        pygame.draw.rect(screen, (200, 128, 200), Four)
     elif newShape.name == 'S':
         pygame.draw.rect(screen, (128, 255, 128), One)
         pygame.draw.rect(screen, (128, 255, 128), Two)
@@ -1468,7 +1485,7 @@ def dropPredict():
         pygame.draw.rect(screen, (255, 192, 128), Three)
         pygame.draw.rect(screen, (255, 192, 128), Four)
 
-def lineClear():
+def lineClear(teaSpin):
     global placedPiece
     yValues = [] #list of all the placed pieces' y coordinates
     fullLines = [] #list of all full lines
@@ -1494,10 +1511,16 @@ def lineClear():
         elif placedPiece[i].y in fullLines:
             placedPiece.pop(i)
 
-
-    t1 = mt.Thread(target=generateParticles, args=(fullLines, None, WHITE, 0.5, round(6.5-1.4*len(fullLines)),))
+    if len(fullLines) == 4:
+        print("tetris particles")
+        t1 = mt.Thread(target=generateParticles, args=(fullLines, None, (255, 235, 150), 0.5, round(6.5-1.4*len(fullLines)), False,)) #gold particles for tetris
+    elif teaSpin == True:
+        print("print tea spin particles")
+        t1 = mt.Thread(target=generateParticles, args=(fullLines, None, (236, 170, 236), 0.5, abs(round(3.5-1.4*len(fullLines))), False,)) #purple particles for tea spin
+    else:
+        t1 = mt.Thread(target=generateParticles, args=(fullLines, None, WHITE, 0.5, abs(round(3.5-1.4*len(fullLines))), False,)) #ew normal line clears, white
     t2 = mt.Thread(target=fallDown, args=(fullLines,))
-
+    
     t1.start()
     t2.start()
 
@@ -1522,6 +1545,8 @@ def checkTspin():
     
     if lastMove == "rotation" and ((detectCollision(a) + detectCollision(b) + detectCollision(c) + detectCollision(d)) >= 3) and newShape.three.y - yCoordinate == 0: 
         print("t spin!")
+        return True
+    else: return False
 
 def checkPC():
     global placedPiece
@@ -1533,21 +1558,70 @@ def checkPC():
 
 
 def hardDrop():
+    global pieceCount
+    teaSpin = False
     while not touchingBottom(None) and not touchingExisting_bottom(None):
         moveDown()
-        drawShape()
+        screen.fill(BLACK) #fill in the black background
+        dropPredict() #update the drop predict
+        drawShape() #draw the urrent piece after the shifts
+        drawPastShape() #draw all the previously dropped pieces
+        drawGrid()
+        pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
+        pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
+        pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
+        renderHold()
+        renderQueue()
         pygame.display.update()
-        pygame.time.delay(1)
-    if newShape.name == 'T':
-        checkTspin()
 
-def hardDrop2():
-    global pieceCount
+    if newShape.name == 'T':
+        teaSpin = checkTspin() #this is when i started to stop taking this so seriously
     setPiece()
     pieceCount += 1
-    lineClear()
+    lineClear(teaSpin)
     checkPC()
 
+def renderHold():
+    global holdPiece, holdLock
+    font = pygame.font.Font('freesansbold.ttf', 25)
+    text = font.render("HOLD", True, BLACK)
+    textRect = text.get_rect()
+    textRect.center = (237, 315)
+    backgroundRect = pygame.Rect(200, 300, 100, 30)
+
+    pygame.draw.rect(screen, WHITE, backgroundRect)
+    screen.blit(text, textRect)
+    pygame.draw.line(screen, WHITE, (202, 330), (202, 375), 5)
+    pygame.draw.line(screen, WHITE, (202, 375), (215, 390), 5)
+    pygame.draw.line(screen, WHITE, (300, 390), (215, 390), 5)
+
+    if not holdPiece: 
+        return
+    if holdLock:
+        screen.blit(holdPiece.locked, (200, 330))
+    else:
+        screen.blit(holdPiece.icon, (200, 330))
+
+
+def renderQueue():
+    global queue
+    font = pygame.font.Font('freesansbold.ttf', 25)
+    text = font.render("NEXT", True, BLACK)
+    textRect = text.get_rect()
+    textRect.center = (635, 315)
+    backgroundRect = pygame.Rect(600, 300, 100, 30)
+
+    pygame.draw.rect(screen, WHITE, backgroundRect)
+    screen.blit(text, textRect)
+    pygame.draw.line(screen, WHITE, (698, 330), (698, 675), 5)
+    pygame.draw.line(screen, WHITE, (698, 675), (683, 690), 5)
+    pygame.draw.line(screen, WHITE, (600, 690), (683, 690), 5)
+
+    screen.blit(queue[0].icon, (600, 340))
+    screen.blit(queue[1].icon, (600, 410))
+    screen.blit(queue[2].icon, (600, 480))
+    screen.blit(queue[3].icon, (600, 550))
+    screen.blit(queue[4].icon, (600, 620))
 
 
 pygame.init()
@@ -1563,22 +1637,24 @@ BLACK = (0,0,0)
 WHITE = (255, 255, 255)
 run = True
 
-dx, softDrop = 0, False
-placedPiece = list()
-bag = list()
-queue = []
-holdPiece = None
-holdLock = False
-input = bool()
-dropped = False
-finishedDropping = True
-pieceCount = 0
-frameCount = 0
-droppedTime = int()
-lastMove = str()
-yCoordinate = 0
+def init():
+    global dx, softDrop, placedPiece, bag, queue, holdPiece, holdLock, input, dropped, finishedDropping, pieceCount, frameCount, droppedTime, lastMove, yCoordinate
+    dx, softDrop = 0, False
+    placedPiece = list()
+    bag = list()
+    queue = []
+    holdPiece = None
+    holdLock = False
+    input = bool()
+    dropped = False
+    finishedDropping = True
+    pieceCount = 0
+    frameCount = 0
+    droppedTime = int()
+    lastMove = str()
+    yCoordinate = 0
 
-
+init()
 screen.fill(BLACK)
 while run:
     for event in pygame.event.get():
@@ -1597,7 +1673,7 @@ while run:
             if event.key == pygame.K_SPACE: #hard drop
                 hardDrop()
                 #hardDropParticles()
-                hardDrop2()
+                #hardDrop2()
             if event.key == pygame.K_ESCAPE: #quit
                 run = False
             if event.key == pygame.K_z: #rotate CCW
@@ -1649,10 +1725,10 @@ while run:
   
     #print(dropped)
     #print(frameCount - droppedTime)
-    if dropped == True and frameCount - droppedTime >= 15: 
+    if dropped == True and frameCount - droppedTime >= 30: 
         print("hard drop")
         hardDrop()  
-        hardDrop2()
+        #hardDrop2()
 
     #-----\UPDATE DISPLAY/-----#
     
@@ -1665,6 +1741,8 @@ while run:
     pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
     pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
     pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
+    renderHold()
+    renderQueue()
     pygame.display.update()
     #print(dropped)
 
