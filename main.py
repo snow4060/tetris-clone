@@ -1,5 +1,4 @@
-from shutil import register_unpack_format
-from turtle import reset
+from numpy import full
 import pygame
 import random
 import copy
@@ -66,7 +65,6 @@ def generateParticles(lines, xCoord, color, shrink, amount, teaSpin):
             for n in range (0, amount):
                 for y in lines:
                     yay.append(particlePolygon(x+15, y+15, color, shrink)) #5 particles for each tile
-    print(len(yay))
     for i in yay:
         i.addParticle() #add the particle for each particle
     for n in range(0, 100):
@@ -83,6 +81,8 @@ def generateParticles(lines, xCoord, color, shrink, amount, teaSpin):
             pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
             renderHold()
             renderQueue()
+            displayMessage(False, 0, False)
+            displayScore()
             #pygame.display.update()
 
             for i in range(0, len(yay)): #render the particles
@@ -97,6 +97,10 @@ def tSpinParticles():
     d = pygame.Rect(newShape.three.x + 30, newShape.three.y + 30, 30, 30)
     if (detectCollision(a) + detectCollision(b) + detectCollision(c) + detectCollision(d)) >= 3: 
         generateParticles([newShape.three.y], newShape.three.x, (255, 160, 255), 0.5, 10, True)
+    if not lineClear(True, True):
+        #display T-spin
+        return
+
 
 """def hardDropParticles():
     t1 = mt.Thread(target=hardDropParticle1, args=())
@@ -212,7 +216,6 @@ def checkDropped():
     global dropped, frameCount, droppedTime
     if dropped == True:
         if not touchingBottom(None) and not touchingExisting_bottom(None):
-            print("e")
             dropped = False
             droppedTime = 0
     elif touchingBottom(None) or touchingExisting_bottom(None):
@@ -221,14 +224,14 @@ def checkDropped():
         return
 
 def newPiece():
+    if not alive:
+        return
     global newShape, bag, dropped, queue, holdLock
     if not bag:
         bag = [O, I, T, J, L, S , Z]
     while len(queue) < 5+1:
         queue.append(random.choice(bag))
         bag.remove(queue[-1])
-    print(queue)
-    print(bag)
     newShape = queue[0]; queue.pop(0)
     dropped = False; holdLock = False
 
@@ -1485,8 +1488,8 @@ def dropPredict():
         pygame.draw.rect(screen, (255, 192, 128), Three)
         pygame.draw.rect(screen, (255, 192, 128), Four)
 
-def lineClear(teaSpin):
-    global placedPiece
+def lineClear(teaSpin, test): #param test: if true, just test if there are full lines
+    global placedPiece, combo, b2b, comboO, b2bO, clearedLines, score
     yValues = [] #list of all the placed pieces' y coordinates
     fullLines = [] #list of all full lines
     for i in placedPiece:
@@ -1498,9 +1501,10 @@ def lineClear(teaSpin):
         if yValues.count(y) == 10:
             fullLines.append(y) #if there are more than 10 tiles on the same y levels it is a full line
     if not fullLines: 
-        return #quit if there aren't any full lines
-    print(fullLines)
-
+        combo = 0
+        return False #quit if there aren't any full lines
+    if test:
+        return True #if it's just a test and there are full lines
     i = 0
     while i < len(placedPiece): #remove the full lines
         if type(placedPiece[i]) is list:
@@ -1512,10 +1516,8 @@ def lineClear(teaSpin):
             placedPiece.pop(i)
 
     if len(fullLines) == 4:
-        print("tetris particles")
         t1 = mt.Thread(target=generateParticles, args=(fullLines, None, (255, 235, 150), 0.5, round(6.5-1.4*len(fullLines)), False,)) #gold particles for tetris
     elif teaSpin == True:
-        print("print tea spin particles")
         t1 = mt.Thread(target=generateParticles, args=(fullLines, None, (236, 170, 236), 0.5, abs(round(3.5-1.4*len(fullLines))), False,)) #purple particles for tea spin
     else:
         t1 = mt.Thread(target=generateParticles, args=(fullLines, None, WHITE, 0.5, abs(round(3.5-1.4*len(fullLines))), False,)) #ew normal line clears, white
@@ -1526,6 +1528,36 @@ def lineClear(teaSpin):
 
     t2.join()
     t1.join()
+    comboO = copy.copy(combo)
+    combo += 1
+    if len(fullLines) == 4 or teaSpin == True:
+        b2bO = copy.copy(b2b)
+        b2b += 1
+    else:
+        b2b = 0
+        b2bO = 0
+
+    #scoring
+    if len(fullLines) == 1 and not teaSpin:
+        score += 50
+    elif len(fullLines) == 2 and not teaSpin:
+        score += 100
+    elif len(fullLines) == 3 and not teaSpin:
+        score += 200
+    elif len(fullLines) == 4 and not teaSpin:
+        score += 400
+    elif len(fullLines) == 1 and teaSpin:
+        score += 200
+    elif len(fullLines) == 2 and teaSpin:
+        score += 400
+    elif len(fullLines) == 3 and teaSpin:
+        score += 600
+    if combo > 1 and not combo == comboO:
+        score += combo*50
+    if b2b > 1 and not b2b == b2bO:
+        score += b2b*100
+
+    return len(fullLines)
 
 def fallDown(lines):
     global placedPiece
@@ -1549,11 +1581,12 @@ def checkTspin():
     else: return False
 
 def checkPC():
-    global placedPiece
+    global placedPiece, score
     for i in placedPiece:
         if type(i) is pygame.Rect:
             return False
     print("PERFECT CLEAR!")
+    score += 1000
     return True
 
 
@@ -1573,13 +1606,80 @@ def hardDrop():
         renderHold()
         renderQueue()
         pygame.display.update()
-
+    checkDeath()
     if newShape.name == 'T':
         teaSpin = checkTspin() #this is when i started to stop taking this so seriously
     setPiece()
     pieceCount += 1
-    lineClear(teaSpin)
-    checkPC()
+    lines = lineClear(teaSpin, False)
+    displayMessage(teaSpin, lines, checkPC())
+
+def displayMessage(tSpin, lines, pc): 
+    #0: T-spin
+    #1: T-spin with lines
+    #2: lines
+    #3: PERFECT CLEAR
+    word = {1: "SINGLE", 2: "DOUBLE", 3: "TRIPLE", 4: "TETRIS"}
+    global frameCount, text1, text2, text3, text4, text5, displayFrame1, displayFrame2, displayFrame3, displayFrame4, displayFrame5, combo, comboO, b2b, b2bO, score
+    if text1:
+        textRect1 = text1.get_rect()
+        textRect1.center = (235, 420)
+    if text2:
+        textRect2 = text2.get_rect()
+        textRect2.center = (235, 438)
+    if text3:
+        textRect3 = text3.get_rect()
+        textRect3.center = (450, 500)
+    if text4:
+        textRect4 = text4.get_rect()
+        textRect4.center = (235, 500)
+    if text5:
+        textRect5 = text5.get_rect()
+        textRect5.center = (235, 475)
+
+    if not tSpin and not lines and not pc:
+        if frameCount - displayFrame1 < 60 and text1:
+            screen.blit(text1, textRect1)
+        if frameCount - displayFrame2 < 60 and text2:
+            screen.blit(text2, textRect2)
+        if frameCount - displayFrame3 < 60 and text3:
+            screen.blit(text3, textRect3)
+        if frameCount - displayFrame4 < 60 and text4:
+            screen.blit(text4, textRect4)
+        if frameCount - displayFrame5 < 60 and text5:
+            screen.blit(text5, textRect5)
+        return
+
+    PURPLE = (200, 0, 200)
+    fontS = pygame.font.Font('freesansbold.ttf', 20)
+    fontL = pygame.font.Font('freesansbold.ttf', 25)
+    fontXL = pygame.font.Font('freesansbold.ttf', 30)
+    if tSpin and not lines:
+        text1 = fontS.render("T-SPIN", True, PURPLE)
+        displayFrame1 = frameCount
+        score += 50
+        #screen.blit(text1, textRect1)
+    if tSpin and lines:
+        text1 = fontS.render("T-SPIN", True, PURPLE)
+        text2 = fontL.render(word[lines], True, WHITE)
+        displayFrame1 = frameCount
+        displayFrame2 = frameCount
+        #screen.blit(text1, textRect1)
+        #screen.blit(text2, textRect2)
+    if not tSpin and lines:
+        text2 = fontL.render(word[lines], True, WHITE)
+        displayFrame2 = frameCount
+        #screen.blit(text2, textRect2)
+    if pc:
+        text3 = fontXL.render("PERFECT CLEAR", True, (255, 255, 200))
+        displayFrame3 = frameCount
+        #screen.blit(text3, textRect3)
+    if combo > 1 and not combo == comboO:
+        text4 = fontL.render(str(combo-1)+" COMBO", True, WHITE)
+        displayFrame4 = frameCount
+    if b2b > 1 and not b2b ==  b2bO:
+        text5 = fontL.render("B2B x"+str(b2b-1), True, WHITE)
+        displayFrame5 = frameCount
 
 def renderHold():
     global holdPiece, holdLock
@@ -1623,11 +1723,72 @@ def renderQueue():
     screen.blit(queue[3].icon, (600, 550))
     screen.blit(queue[4].icon, (600, 620))
 
+def leveling():
+    global level, clearedLines
+    if clearedLines >= (level+1)*5:
+        level += 1
+        clearedLines = 0
+    font = pygame.font.Font('freesansbold.ttf', 25)
+    text = font.render("LEVEL "+str(level), True, WHITE)
+    textRect = text.get_rect()
+    textRect.center = (235, 600)
+    screen.blit(text, textRect)
+
+def displayScore():
+    global score
+    font = pygame.font.Font('freesansbold.ttf', 25)
+    text = font.render("SCORE: "+str(score), True, WHITE)
+    textRect = text.get_rect()
+    textRect.center = (450, 935)
+    screen.blit(text, textRect)
+
+def checkDeath():
+    global newShape, alive
+    if newShape.one.y < 300 and newShape.two.y < 300 and newShape.three.y < 300 and newShape.four.y < 300 and not lineClear(False, True):
+        alive = False
+        print("died")
+        pygame.display.update()
+        die()
+
+def die():
+    """t1 = mt.Thread(target=generateParticles, args=([285], None, WHITE, 0.5, 2, False,))
+    t2 = mt.Thread(target=generateParticles, args=([885], None, WHITE, 0.5, 2, False,))
+    t3 = mt.Thread(target=generateParticles, args=([i for i in range(330, 900, 30)], 285, WHITE, 0.5, 2, False,))
+    t4 = mt.Thread(target=generateParticles, args=([i for i in range(330, 900, 30)], 585, WHITE, 0.5, 2, False,))
+    #t3 = mt.Thread(target=generateParticles, args=([330, 360, 390, 420, 450, 480, 510, 540, 570, 600, 630], 285, WHITE, 0.5, 2, False,))
+    #t4 = mt.Thread(target=generateParticles, args=([330, 360, 390, 420, 450, 480, 510, 540, 570, 600, 630], 585, WHITE, 0.5, 2, False,))
+
+    t1.start()
+    #t2.start()
+    #t3.start()
+    #t4.start()
+    t1.join()
+    #t2.join()
+    #t3.join()
+    #t4.join()"""
+    generateParticles([285], None, WHITE, 0.1, 2, True)
+    #generateParticles([i for i in range(330, 900, 30)], 285, WHITE, 0.5, 2, True)
+    #generateParticles([885], None, WHITE, 0.5, 2, True)
+    #generateParticles([i for i in range(330, 900, 30)], 585, WHITE, 0.5, 2, True)
+
+    pygame.image.save(screen, "screenshot.png")
+    screen.fill(BLACK)
+    x = random.uniform(-0.5, 0.5)
+    x1 = 0
+    board = pygame.image.load("screenshot.png")
+    for y in range(0, 1000):
+        x1 = round(x1 + x)
+        #screen.fill(BLACK)
+        #print("yes")
+        screen.blit(board, (x1, y))
+        pygame.display.update()
+    
+
 
 pygame.init()
 clock = pygame.time.Clock()
 pygame.display.set_caption("aw lord")
-screen = pygame.display.set_mode((900, 1000), flags=pygame.RESIZABLE) 
+screen = pygame.display.set_mode((900, 1000), flags=pygame.RESIZABLE)    
 bottom = pygame.Rect(300, 900, 300, 300)
 left = pygame.Rect(0, 0, 300, 1000)
 right = pygame.Rect(600, 0, 300, 1000)
@@ -1638,7 +1799,7 @@ WHITE = (255, 255, 255)
 run = True
 
 def init():
-    global dx, softDrop, placedPiece, bag, queue, holdPiece, holdLock, input, dropped, finishedDropping, pieceCount, frameCount, droppedTime, lastMove, yCoordinate
+    global dx, softDrop, placedPiece, bag, queue, holdPiece, holdLock, input, dropped, finishedDropping, pieceCount, frameCount, droppedTime, lastMove, yCoordinate, text1, text2, text3, text4, text5, displayFrame1, displayFrame2, displayFrame3, displayFrame4, displayFrame5, combo, comboO, b2b, b2bO, clearedLines, level, score, alive
     dx, softDrop = 0, False
     placedPiece = list()
     bag = list()
@@ -1653,10 +1814,43 @@ def init():
     droppedTime = int()
     lastMove = str()
     yCoordinate = 0
+    text1, text2, text3, text4, text5 = None, None, None, None, None
+    displayFrame1, displayFrame2, displayFrame3, displayFrame4, displayFrame5 = 0, 0, 0, 0, 0
+    combo = 0
+    comboO = 0
+    b2b = 0
+    b2bO = 0
+    clearedLines = 0
+    level = 1
+    score = 0
+    alive = True
+
 
 init()
 screen.fill(BLACK)
 while run:
+    if not alive:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE: #quit
+                    run = False
+                if event.key == pygame.K_RETURN:
+                    Alive = True
+                    init()
+        font = pygame.font.Font('freesansbold.ttf', 25)
+        text6 = font.render("SCORE: "+str(score), True, WHITE)
+        textRect6 = text6.get_rect()
+        textRect6.center = (450, 500)
+        text7 = font.render("PRESS ENTER FOR NEW GAME", True, WHITE)
+        textRect7 = text7.get_rect()
+        textRect7.center = (450, 550)
+        screen.fill(BLACK)
+        screen.blit(text6, textRect6)
+        screen.blit(text7, textRect7)
+        pygame.display.update()
+        continue
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -1672,6 +1866,7 @@ while run:
                 input = True 
             if event.key == pygame.K_SPACE: #hard drop
                 hardDrop()
+                score += 10
                 #hardDropParticles()
                 #hardDrop2()
             if event.key == pygame.K_ESCAPE: #quit
@@ -1710,7 +1905,7 @@ while run:
         newPiece()
         finishedDropping = False
 
-    if softDrop == True and dropped == False and not touchingBottom(None) and not touchingExisting_bottom(None) and frameCount %2 == 0: #if softdrop is inputted
+    if softDrop == True and dropped == False and not touchingBottom(None) and not touchingExisting_bottom(None): #if softdrop is inputted
         lastMove = "move down"
         moveDown()
     if frameCount %2 == 0:
@@ -1722,14 +1917,12 @@ while run:
         moveDown()
 
     checkDropped() #check if this piece has been dropped
-  
-    #print(dropped)
-    #print(frameCount - droppedTime)
+
     if dropped == True and frameCount - droppedTime >= 30: 
-        print("hard drop")
         hardDrop()  
         #hardDrop2()
-
+        score += 5
+    leveling()
     #-----\UPDATE DISPLAY/-----#
     
     screen.fill(BLACK) #fill in the black background
@@ -1743,15 +1936,16 @@ while run:
     pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
     renderHold()
     renderQueue()
+    displayMessage(False, 0, False)
+    displayScore()
     pygame.display.update()
-    #print(dropped)
 
 
     
 
-    clock.tick(30) #15 FPS
+    clock.tick(30) #30 FPS
 
 pygame.quit()  # de-initialize the pygame module
-print(pieceCount)
+#print(pieceCount)
 
 
