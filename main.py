@@ -1,4 +1,3 @@
-from numpy import full
 import pygame
 import random
 import copy
@@ -71,11 +70,11 @@ def generateParticles(lines, xCoord, color, shrink, amount, teaSpin):
         for i in range(0, 1):
             screen.fill(BLACK) #fill in the black background
             #dropPredict() #update the drop predict
+            drawGrid()
             if teaSpin:
                 drawShape() 
             drawPastShape() #draw all the previously dropped pieces
             #pygame.draw.rect(screen, [255, 0, 255], bottom)
-            drawGrid()
             pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
             pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
             pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
@@ -1596,10 +1595,10 @@ def hardDrop():
     while not touchingBottom(None) and not touchingExisting_bottom(None):
         moveDown()
         screen.fill(BLACK) #fill in the black background
+        drawGrid()
         dropPredict() #update the drop predict
         drawShape() #draw the urrent piece after the shifts
         drawPastShape() #draw all the previously dropped pieces
-        drawGrid()
         pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
         pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
         pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
@@ -1827,6 +1826,7 @@ def init():
 
 
 init()
+alive = False
 screen.fill(BLACK)
 while run:
     if not alive:
@@ -1926,11 +1926,11 @@ while run:
     #-----\UPDATE DISPLAY/-----#
     
     screen.fill(BLACK) #fill in the black background
+    drawGrid()
     dropPredict() #update the drop predict
     drawShape() #draw the urrent piece after the shifts
     drawPastShape() #draw all the previously dropped pieces
     #pygame.draw.rect(screen, [255, 0, 255], bottom)
-    drawGrid()
     pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
     pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
     pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
