@@ -1,4 +1,3 @@
-from numpy import full
 import pygame
 import random
 import copy
@@ -71,11 +70,11 @@ def generateParticles(lines, xCoord, color, shrink, amount, teaSpin):
         for i in range(0, 1):
             screen.fill(BLACK) #fill in the black background
             #dropPredict() #update the drop predict
+            drawGrid()
             if teaSpin:
                 drawShape() 
             drawPastShape() #draw all the previously dropped pieces
             #pygame.draw.rect(screen, [255, 0, 255], bottom)
-            drawGrid()
             pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
             pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
             pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
@@ -1596,10 +1595,10 @@ def hardDrop():
     while not touchingBottom(None) and not touchingExisting_bottom(None):
         moveDown()
         screen.fill(BLACK) #fill in the black background
+        drawGrid()
         dropPredict() #update the drop predict
         drawShape() #draw the urrent piece after the shifts
         drawPastShape() #draw all the previously dropped pieces
-        drawGrid()
         pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
         pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
         pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
@@ -1749,6 +1748,7 @@ def checkDeath():
         print("died")
         pygame.display.update()
         die()
+        print("elioty was here :D")
 
 def die():
     """t1 = mt.Thread(target=generateParticles, args=([285], None, WHITE, 0.5, 2, False,))
@@ -1788,7 +1788,7 @@ def die():
 pygame.init()
 clock = pygame.time.Clock()
 pygame.display.set_caption("aw lord")
-screen = pygame.display.set_mode((900, 1000), flags=pygame.RESIZABLE)    
+screen = pygame.display.set_mode((900, 1200))#, flags=pygame.RESIZABLE)    
 bottom = pygame.Rect(300, 900, 300, 300)
 left = pygame.Rect(0, 0, 300, 1000)
 right = pygame.Rect(600, 0, 300, 1000)
@@ -1827,6 +1827,7 @@ def init():
 
 
 init()
+alive = False
 screen.fill(BLACK)
 while run:
     if not alive:
@@ -1911,9 +1912,9 @@ while run:
     if frameCount %2 == 0:
         moveHorizontal() #check if it needs to be shifted horizontally and does so
 
-    if frameCount % 8 == 0 and input == False and dropped == False and not frameCount % 24 == 0: #move down every 12 frames
+    if frameCount % round(8*(2/level)) == 0 and input == False and dropped == False and not frameCount % round(24*(2/level)) == 0: #move down every 12 frames
         moveDown()
-    if frameCount % 24 == 0 and dropped == False and softDrop == False: #prevent player from stalling game by holding rotate/move by force moving every 12 frames
+    if frameCount % round(24*(2/level)) == 0 and dropped == False and softDrop == False: #prevent player from stalling game by holding rotate/move by force moving every 12 frames
         moveDown()
 
     checkDropped() #check if this piece has been dropped
@@ -1926,11 +1927,11 @@ while run:
     #-----\UPDATE DISPLAY/-----#
     
     screen.fill(BLACK) #fill in the black background
+    drawGrid()
     dropPredict() #update the drop predict
     drawShape() #draw the urrent piece after the shifts
     drawPastShape() #draw all the previously dropped pieces
     #pygame.draw.rect(screen, [255, 0, 255], bottom)
-    drawGrid()
     pygame.draw.line(screen, WHITE, (300, 300), (300, 900), 5)
     pygame.draw.line(screen, WHITE, (298, 900), (602, 900), 5)
     pygame.draw.line(screen, WHITE, (600, 300), (600, 900), 5)
